@@ -1,0 +1,491 @@
+CREATE TABLE Cart_Item ( -- 購物車商品
+    ShoppingCart_Item_ID INT PRIMARY KEY, -- 購物車商品ID
+    ShoppingCart_ID INT, -- 購物車ID
+    Product_ID INT, -- 商品ID
+    Quantity INT, -- 數量
+    Cart_Item_Amount MONEY -- 單種商品總價
+);
+
+CREATE TABLE ShoppingCart ( -- 購物車
+    ShoppingCart_ID INT PRIMARY KEY, -- 購物車ID
+    Member_ID INT, -- 會員ID
+    Cart_Item_ID INT, -- 購物車商品ID
+    Pre_Discount_Amount INT, -- 折扣前商品總價
+    Discount_Amount INT, -- 折扣總價
+    ShoppingCart_Amount INT -- 購物車總價
+);
+
+CREATE TABLE ShoppingMember_PromoCode ( -- 購物會員折扣碼
+    ShoppingMember_PromoCode_ID INT PRIMARY KEY, -- 購物會員折扣碼ID
+    Member_ID INT, -- 會員ID
+    ShoppingPromoCode_ID INT, -- 商城折扣碼ID
+    PromoCode_Quantity INT, -- 折扣碼數量
+    ShoppingPromoCode_CreateDate DATETIME, -- 領取折扣碼時間
+    ShoppingPromoCode_LastDate DATETIME -- 折扣碼最後時間
+);
+
+CREATE TABLE ShoppingPromoCode ( -- 商城折扣碼
+    ShoppingPromoCode_ID INT PRIMARY KEY,
+    ShoppingPromoCode_Code VARCHAR(255),
+    ShoppingPromoCode_Date INT, -- 折扣碼使用天數
+    ShoppingPromoCode_Limit INT, -- 領取數量上限
+    room_promo_percent FLOAT, -- 折扣比例
+    room_promo_amount MONEY, -- 折扣金額
+    shop_promo_min_money MONEY, -- 折扣碼生效金額下限
+    level_limit MONEY -- 領取等級下限
+);
+
+CREATE TABLE MemberPromoList ( -- 會員折扣碼清單
+    member_promo_list_id INT PRIMARY KEY,
+    member_id INT,
+    room_promo_id INT,
+    shoppingMember_PromoCode_ID INT
+);
+
+CREATE TABLE ShoppingOrder ( -- 購物訂單
+    shopping_order_id INT PRIMARY KEY, -- 購物訂單ID
+    shop_customer_id INT, -- 收貨人客戶ID
+    payment_method NVARCHAR(255), -- 付款方式
+    total_payment DECIMAL(10, 2), -- 訂單總金額
+    create_order_date DATETIME DEFAULT CURRENT_TIMESTAMP, -- 訂單成立時間
+    order_status NVARCHAR(255), -- 訂單狀態
+    last_order_status_update DATETIME, -- 訂單最後更新時間
+    shopping_order_description NVARCHAR(255), -- 訂單描述
+    payment_status BIT -- 付款狀態
+);
+
+CREATE TABLE ShoppingDetail ( -- 單一商品明細表
+    shopping_detail_id INT PRIMARY KEY, -- 單一商品明細ID
+    shopping_order_id INT, -- 購物清單ID
+    product_id INT, -- 商品ID
+    shop_id INT, -- 賣方ID
+    product_quantity INT, -- 商品個數
+    total_amount DECIMAL(10, 2) -- 單一產品總金額
+);
+
+CREATE TABLE Inventory ( -- 倉庫
+    inventory_id INT PRIMARY KEY, -- 倉庫ID
+    product_id INT, -- 產品ID
+    capacity INT, -- 容量
+    stock_quantity INT -- 庫存
+);
+
+CREATE TABLE ProductCategory ( -- 商品類別
+    product_category_id INT PRIMARY KEY, -- 商品類別ID
+    category_name NVARCHAR(50) NOT NULL, -- 商品類別名稱
+    parent_category_id INT -- 父類別ID
+);
+
+CREATE TABLE ProductPhoto ( -- 商品照片
+    product_photo_id INT PRIMARY KEY, -- 商品照片ID
+    product_id INT NOT NULL, -- 商品ID
+    product_photo VARBINARY(MAX) NULL -- 商品照片
+);
+
+CREATE TABLE Product ( -- 商品
+    product_id INT PRIMARY KEY, -- 商品ID
+    shop_id INT NOT NULL, -- 商店ID
+    product_name NVARCHAR(100) NOT NULL, -- 商品名稱
+    product_category_id NVARCHAR(50) NOT NULL, -- 商品類別ID
+    inventory_id INT NOT NULL, -- 倉庫ID
+    SKU NVARCHAR(20), -- 庫存單位
+    brand_name NVARCHAR(10), -- 供應商品牌
+    product_unit_price DECIMAL(10, 2) NOT NULL, -- 商品定價
+    discount DECIMAL(5, 2), -- 折扣
+    product_description NVARCHAR(500), -- 商品描述
+    createdate_datetime DATETIME, -- 上架時間
+    lastupdated_datetime DATETIME -- 最新更新時間
+);
+
+CREATE TABLE SellerInfo ( -- SellerInfo 賣家資訊
+    shop_id INT PRIMARY KEY, -- 賣家ID
+    shop_image VARBINARY(MAX), -- 賣家圖片
+    seller_first_name NVARCHAR(255), -- 賣家姓
+    seller_last_name NVARCHAR(255), -- 賣家名
+    seller_phone NVARCHAR(20), -- 賣家電話
+    seller_email VARCHAR(255), -- 賣家信箱
+    seller_address NVARCHAR(255) -- 賣家住址
+);
+
+CREATE TABLE ShopCustomerInfo ( -- ShopCustomerInfo 收貨人資訊
+    shop_customer_id INT PRIMARY KEY, -- 收貨人客戶ID
+    member_id INT, -- 會員ID
+    shopper_phone INT, -- 收貨人電話
+    shopper_first_name NVARCHAR(255), -- 收貨人姓
+    shopper_last_name NVARCHAR(255), -- 收貨人名
+    shopper_email VARCHAR(255), -- 收貨人電子郵件
+    shopper_password VARCHAR(255), -- 收貨人密碼
+    shopper_address NVARCHAR(255), -- 收貨人地址
+    shopper_gender BIT -- 收貨人性別
+);
+
+CREATE TABLE member_profile ( -- member_profile 會員資訊
+    member_id INT PRIMARY KEY, -- 會員ID
+    member_first_name NVARCHAR(255) UNIQUE NOT NULL, -- 會員姓
+    member_last_name NVARCHAR(255) UNIQUE NOT NULL, -- 會員名
+    member_gender BIT, -- 會員性別
+    member_birthdate DATE, -- 會員生日
+    member_phone NVARCHAR(20), -- 會員電話
+    member_address NVARCHAR(255), -- 會員住址
+    member_join_datetime DATETIME, -- 加入時間
+    member_country NVARCHAR(255), -- 會員國籍
+    preferred_language NVARCHAR(20), -- 偏好語言
+    newsletter_subscription BIT, -- 新聞推送
+    social_media_account NVARCHAR(200) -- 社交媒體帳號
+);
+
+CREATE TABLE MemberPoints ( -- MemberPoints 會員點數
+    memember_point_Id INT PRIMARY KEY, -- 會員點數ID
+    member_id INT, -- 會員ID
+    current_points INT DEFAULT 0, -- 當前累積點數
+    change_type NVARCHAR(100) NOT NULL, -- 變更類型 (earned, spent)
+    change_reason NVARCHAR(255), -- 變更原因
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP -- 創建時間
+);
+
+CREATE TABLE MemberLevels ( -- MemberLevels 會員等級
+    member_id INT, -- 會員ID
+    level_id INT, -- 等級ID
+    update_datetime DATETIME DEFAULT CURRENT_TIMESTAMP, -- 更新時間
+    PRIMARY KEY (member_id, level_id) -- 複合主鍵
+);
+
+CREATE TABLE Levels ( -- Levels 等級
+    level_id INT IDENTITY(1,1) PRIMARY KEY, -- 等級ID
+    level_name NVARCHAR(50) NOT NULL, -- 等級名稱
+    min_points INT, -- 最低點數
+    max_points INT, -- 最高點數
+    level_description NVARCHAR(255) -- 等級描述
+);
+
+CREATE TABLE PasswordReset ( -- PasswordReset 忘記密碼(信箱驗證)
+    pwd_reset_id INT IDENTITY(1,1) PRIMARY KEY, -- 忘記密碼ID
+    member_id INT NOT NULL, -- 會員ID
+    reset_code NVARCHAR(255) NOT NULL, -- 驗證碼
+    reset_password VARCHAR(255), -- 重設新密碼
+    expiration_time DATETIME NOT NULL, -- 最後可驗證時間(1小時內)
+    reset_requested_at DATETIME DEFAULT GETDATE(), -- 發送驗證信時間
+    reset_completed BIT, -- 是否完成驗證
+    updated_at DATETIME -- 更新時間
+);
+
+CREATE TABLE login_history ( -- login_history 登入歷史
+    login_id INT PRIMARY KEY, -- 登入ID
+    member_id INT, -- 會員ID
+    login_time DATETIME, -- 登入時間
+    logout_time DATETIME, -- 登出時間
+    ip_address VARCHAR(45), -- IP地址
+    device VARCHAR(255), -- 裝置名稱
+    status NVARCHAR(20), -- 狀態 (成功, 失敗, 鎖定)
+    login_method NVARCHAR(50) -- 登入方式 (密碼, 第三方認證)
+);
+
+CREATE TABLE EmailVerification ( -- EmailVerification 註冊時信箱驗證 (防惡意註冊)
+    verification_id INT IDENTITY(1,1) PRIMARY KEY, -- 驗證ID
+    member_id INT, -- 會員ID
+    verification_code NVARCHAR(50) NOT NULL, -- 驗證碼
+    expiration_time DATETIME NOT NULL, -- 驗證碼過期時間
+    verified BIT DEFAULT 0, -- 是否已驗證
+    verify_time DATETIME -- 發送驗證信郵件的時間
+);
+
+CREATE TABLE MemberSocialAccounts ( -- MemberSocialAccounts 會員社交帳號
+    social_account_id INT IDENTITY(1,1) PRIMARY KEY, -- 社交帳號ID
+    member_id INT, -- 會員ID
+    social_platform NVARCHAR(100), -- 社交平台
+    social_account NVARCHAR(255) UNIQUE NOT NULL, -- 社交平台帳號ID
+    access_token NVARCHAR(255), -- 存取令牌
+    refresh_token NVARCHAR(255), -- 更新令牌
+    created_at DATETIME DEFAULT GETDATE() -- 創建時間
+);
+
+CREATE TABLE Member ( -- Member 會員
+    member_id INT PRIMARY KEY, -- 會員ID
+    member_password_hash VARCHAR(255), -- 會員密碼
+    member_email VARCHAR(255) UNIQUE NOT NULL, -- 會員電子郵件
+    member_status NVARCHAR(255), -- 會員狀態 (inactive未啟用、active啟用、banned停權)
+    last_login DATETIME -- 最後登入時間
+);
+
+CREATE TABLE Extra ( -- Extra 超時
+    extra_id INT PRIMARY KEY, -- 超時ID
+    room_type_id INT, -- 房型ID
+    room_order_id INT, -- 房間訂單ID
+    extra_time DATETIME -- 超時時數
+);
+
+CREATE TABLE RoomTypeList ( -- RoomTypeList 訂房房型清單
+    room_type_list_id INT PRIMARY KEY, -- 訂房清單ID
+    room_order_id INT, -- 住宿訂單ID
+    room_type_id INT, -- 房型ID
+    count INT -- 數量
+);
+
+CREATE TABLE RoomType ( -- RoomType 房型
+    room_type_id INT PRIMARY KEY, -- 房型ID
+    room_type_name NVARCHAR(255), -- 房型名稱
+    bed_type NVARCHAR(255), -- 床型
+    area INT, -- 面積
+    bathroom_type NVARCHAR(255), -- 浴廁型態
+    room_type_description NVARCHAR(MAX), -- 房型描述
+    handicap_design BIT, -- 身障友好
+    adult_capacity INT, -- 可容納成人數
+    children_capacity INT, -- 可容納小孩數
+    max_capacity INT, -- 最大容納人數
+    additional_price_per_person DECIMAL(10,2), -- 加入價格/每位
+    unit_price DECIMAL(10,2), -- 房價
+    extra_ratio DECIMAL(10,2) -- 超時房價 (money/hour)
+);
+
+CREATE TABLE RoomTypePhoto ( -- RoomTypePhoto 房型照片
+    room_type_photo_id INT PRIMARY KEY, -- 房間照片ID
+    room_type_id INT, -- 房型ID
+    room_photo VARBINARY(MAX) -- 房間照片
+);
+
+CREATE TABLE EventList ( -- EventList 活動參與清單
+    event_list_id INT PRIMARY KEY, -- 活動清單ID
+    room_customer_id INT, -- 房客ID
+    event_id INT -- 活動ID
+);
+
+CREATE TABLE EventType ( -- EventType 活動類型
+    event_type_id INT PRIMARY KEY, -- 活動類型ID
+    event_ID INT, -- 活動ID
+    event_host_id INT, -- 主辦方ID
+    event_type_name NVARCHAR(255), -- 活動類型名稱
+    event_guest_max_count INT, -- 活動人數上限
+    event_type_description NVARCHAR(MAX) -- 活動類型描述
+);
+
+CREATE TABLE EventTypePhoto ( -- EventTypePhoto 活動預覽圖
+    event_type_photo_id INT PRIMARY KEY, -- 活動預覽圖ID
+    event_type_id INT, -- 活動類型ID
+    event_type_photo VARBINARY(MAX) -- 活動預覽圖
+);
+
+CREATE TABLE Event ( -- Event 活動
+    event_id INT PRIMARY KEY, -- 活動ID
+    room_customer_id INT, -- 會員ID
+    event_name NVARCHAR(255), -- 活動名稱
+    event_date DATE, -- 活動日期
+    infrastructure_id INT, -- 設施ID
+    guest_count INT, -- 賓客人數
+    status NVARCHAR(255), -- 狀態 (如已確認、取消)
+    remarks NVARCHAR(MAX) -- 備註
+);
+
+CREATE TABLE facility ( -- facility 設施 (含餐廳)
+    facility_id INT PRIMARY KEY, -- 設施ID
+    facility_name NVARCHAR(255), -- 設施名稱
+    building_id INT, -- 建築物ID
+    located_floor INT, -- 設施位置樓層
+    opening_hour DATETIME, -- 營業時間
+    closing_hour DATETIME, -- 結束時間
+    capacity INT, -- 容納人數
+    open_time DATETIME, -- 開放時間
+    facility_status NVARCHAR(255), -- 設施當前狀態 (available可用, unavailable不可用, other其他)
+    contact_number VARCHAR(255), -- 聯絡電話
+    facility_description NVARCHAR(MAX) -- 設施描述
+);
+
+CREATE TABLE Building ( -- Building 建築
+    building_id INT PRIMARY KEY, -- 建築物ID
+    building_name NVARCHAR(255), -- 建築物名稱
+    building_floor INT, -- 建築物總樓層
+    total_floor INT -- 總樓層數
+);
+
+CREATE TABLE EventPhoto ( -- EventPhoto 活動照片
+    event_photo_id INT PRIMARY KEY, -- 活動照片ID
+    event_photo VARBINARY(MAX) -- 活動照片
+);
+
+CREATE TABLE FacilityPhoto ( -- FacilityPhoto 設施照片
+    facility_photo_id INT PRIMARY KEY, -- 設施照片ID
+    facility_id INT, -- 設施ID
+    facility_photo VARBINARY(MAX) -- 設施照片
+);
+
+CREATE TABLE RoomTypeList2 ( -- RoomTypeList 房型清單
+    room_type_list_id INT PRIMARY KEY, -- 房型清單ID
+    room_offer_id INT, -- 訂房方案ID
+    room_type_id INT -- 房型ID
+);
+
+CREATE TABLE RoomAvailability ( -- RoomAvailability 房間可用表
+    room_availability_id INT PRIMARY KEY, -- 房間可用ID
+    Date DATE, -- 日期 (一年內)
+    room_type_id INT, -- 房型ID
+    is_available BIT -- 是否可用
+);
+
+CREATE TABLE RoomReservation ( -- RoomReservation 房間預約表
+    room_availability_id INT PRIMARY KEY, -- 房間預約ID
+    Date DATE, -- 日期 (一年內)
+    room_id INT, -- 房間ID
+    is_reserved BIT -- 是否被訂
+);
+
+CREATE TABLE Room ( -- Room 房間
+    room_id INT PRIMARY KEY, -- 房間ID
+    room_number INT, -- 房間編號
+    room_floor INT, -- 房間樓層位置
+    building_id INT, -- 建築物ID
+    room_type_id INT -- 房型ID
+);
+
+CREATE TABLE RoomList ( -- RoomList 訂房房間清單
+    room_list_id INT PRIMARY KEY, -- 訂房清單ID
+    room_order_id INT, -- 住宿訂單ID
+    room_id INT -- 房間ID
+);
+
+CREATE TABLE RoomOffer ( -- RoomOffer 訂房方案
+    room_offer_id INT PRIMARY KEY, -- 訂房方案ID
+    room_offer_start_date DATETIME, -- 方案開始日期
+    room_offer_end_date DATETIME, -- 方案結束日期
+    level_id INT, -- 適用最低會員等級
+    room_offer_price MONEY, -- 方案價格
+    room_offer_text NVARCHAR(MAX) -- 訂房方案內容
+);
+
+CREATE TABLE RoomPromo ( -- RoomPromo 房間折扣
+    room_promo_id INT PRIMARY KEY, -- 房間折扣ID
+    room_promo_code VARCHAR(255), -- 房間折扣碼
+    room_promo_percent FLOAT, -- 折扣百分比
+    room_promo_amount MONEY, -- 折扣金額
+    room_promo_start_date DATETIME, -- 折扣碼開始日期
+    room_promo_end_date DATETIME, -- 折扣碼結束日期
+    room_promo_min_money MONEY, -- 折扣碼生效金額下限
+    level_id INT -- 會員等級
+);
+
+CREATE TABLE RoomOrder ( -- RoomOrder 房間訂單
+    room_order_id INT PRIMARY KEY, -- 住宿訂單ID
+    member_id INT, -- 會員ID
+    room_offer_id INT, -- 訂房方案ID
+    order_status NVARCHAR(10), -- 訂單狀態 (pending未付訂金, confirmed已付訂金, completed已入住)
+    order_datetime DATETIME, -- 下單時間
+    expiration_datetime DATETIME, -- 過期時間
+    last_update_time DATETIME, -- 最後更新時間
+    starting_date DATETIME, -- 預定入住時間(15:00)
+    leaving_date DATETIME, -- 預定退房時間(11:00)
+    resident_count FLOAT, -- 住客人數
+    total_payment FLOAT, -- 費用總和
+    payment_status BIT, -- 付款狀態
+    checkin_date DATETIME, -- 實際入住時間
+    checkout_date DATETIME, -- 實際退房時間
+    have_extra BIT, -- 是否超時
+    have_room_service BIT -- 是否使用客房服務
+);
+
+CREATE TABLE RoomServiceOrder ( -- RoomServiceOrder 客房服務訂單
+    room_service_order_id INT PRIMARY KEY, -- 客房服務訂單ID
+    room_order_id INT, -- 住宿訂單ID
+    room_service_total DECIMAL(10,2), -- 客房服務總價
+    room_service_order_time DATETIME, -- 客房服務下單時間
+    room_id INT, -- 房間ID
+    room_service_status NVARCHAR(255), -- 訂單狀態
+    custom_notes NVARCHAR(255), -- 備註
+    member_id INT -- 會員ID
+);
+
+CREATE TABLE Food_item ( -- Food_item 餐點明細
+    order_food_id INT PRIMARY KEY, -- 餐點明細ID
+    ShoppingCart_id INT, -- 購物車ID
+    food_id INT, -- 餐點ID
+    food_quantity INT -- 餐點份數
+);
+
+CREATE TABLE ShoppingCart2 ( -- ShoppingCart 購物車
+    ShoppingCart_id INT PRIMARY KEY, -- 購物車ID
+    food_quantity INT, -- 餐點數量
+    subtotal INT, -- 小計金額
+    member_id INT -- 會員ID
+);
+
+CREATE TABLE Food ( -- Food 餐點
+    food_id INT PRIMARY KEY, -- 餐點ID
+    infrastructure_id INT, -- 設施ID
+    food_name VARCHAR(255), -- 餐點名稱
+    food_unit_price DECIMAL(10,2), -- 餐點單價
+    food_description NVARCHAR(255), -- 餐點描述
+    food_category_id NVARCHAR(255), -- 餐點分類ID
+    calories INT, -- 熱量(kcal)
+    food_availability VARCHAR(255) -- 食物可否下單 (available可用, on season季節限定, not on season非當季, unavailable暫停供餐)
+);
+
+CREATE TABLE FoodPhoto ( -- FoodPhoto 食物照片
+    food_photo_id INT PRIMARY KEY, -- 食物照片ID
+    food_id INT, -- 食物ID
+    food_image VARBINARY(MAX) -- 食物照片
+);
+
+CREATE TABLE News ( -- News 新聞報導
+    news_id INT PRIMARY KEY, -- 新聞ID
+    news_content NVARCHAR(MAX), -- 新聞內容
+    news_image VARBINARY(MAX) -- 新聞圖片
+);
+
+CREATE TABLE MessageList ( -- MessageList 即時回覆
+    message_id INT PRIMARY KEY, -- 即時回覆ID
+    message_content NVARCHAR(MAX) -- 即時回覆內容
+);
+
+CREATE TABLE RightsObligations ( -- RightsObligations 權利與義務
+    rights_obligations_id INT PRIMARY KEY, -- 權利義務ID
+    right_obligations_conent NVARCHAR(MAX) -- 權利義務內容
+);
+
+CREATE TABLE QAlist ( -- QAlist 問答
+    qa_id INT PRIMARY KEY, -- 問答ID
+    qa_title NVARCHAR(MAX), -- 問題
+    qa_content NVARCHAR(MAX) -- 回答
+);
+
+CREATE TABLE Announcement ( -- Announcement 活動通知
+    announcement_id INT PRIMARY KEY, -- 通知ID
+    announcement_content NVARCHAR(MAX), -- 通知內容
+    announcement_image VARBINARY(MAX) -- 通知圖片
+);
+
+CREATE TABLE HotNewsList ( -- HotNewsList 最新消息
+    hot_news_id INT PRIMARY KEY, -- 最新消息ID
+    hot_news_content NVARCHAR(MAX), -- 最新消息內容
+    hot_news_image VARBINARY(MAX) -- 最新消息圖片
+);
+
+CREATE TABLE Employee ( -- Employee 員工
+    employee_id INT PRIMARY KEY, -- 員工ID
+    employee_role_id INT, -- 員工職位ID
+    department_id INT, -- 部門ID
+    employee_first_name NVARCHAR(255), -- 員工姓
+    employee_last_name NVARCHAR(255), -- 員工名
+    employee_phone VARCHAR(255), -- 員工電話
+    employee_email VARCHAR(255), -- 員工信箱
+    employee_address NVARCHAR(255), -- 員工地址
+    employee_status NVARCHAR(255) -- 員工狀態 (在職/離職/留職停薪/休假)
+);
+
+CREATE TABLE EmployeeRole ( -- EmployeeRole 員工職位
+    employee_role_id INT PRIMARY KEY, -- 員工職位ID
+    role_name NVARCHAR(255) -- 員工職位名稱
+);
+
+CREATE TABLE RolePermission ( -- RolePermission 職位權限
+    employee_role_id INT, -- 員工職位權限
+    department_id INT, -- 部門ID
+    function_id INT, -- 功能ID
+    PRIMARY KEY (employee_role_id, department_id, function_id) -- 複合主鍵
+);
+
+CREATE TABLE FunctionPermission ( -- FunctionPermission 功能權限
+    function_id INT PRIMARY KEY, -- 功能ID
+    function_name NVARCHAR(255) -- 功能名稱
+);
+
+CREATE TABLE Department ( -- Department 部門
+    department_id INT PRIMARY KEY, -- 部門ID
+    department_name NVARCHAR(255) -- 部門名稱
+);
